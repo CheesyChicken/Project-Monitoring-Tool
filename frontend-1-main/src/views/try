@@ -1,0 +1,375 @@
+<template>
+<div>
+ 
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+      <a href class="navbar-brand" @click.prevent></a>
+      <div class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <router-link to="/home" class="nav-link">
+            <font-awesome-icon icon="home" />Home
+          </router-link>
+        </li>
+        <li v-if="showStudentBoard" class="nav-item">
+          <router-link to="/student" class="nav-link">Student Board</router-link>
+        </li>
+        <li v-if="showGuideBoard" class="nav-item">
+          <router-link to="/guide" class="nav-link">Guide Board</router-link>
+        </li>
+        <li v-if="showHodBoard" class="nav-item">
+          <router-link to="/hod" class="nav-link">Hod Board</router-link>
+        </li>
+        <li v-if="showDirectorBoard" class="nav-item">
+          <router-link to="/director" class="nav-link">Director Board</router-link>
+        </li>
+        <!-- <li class="nav-item">
+          <router-link v-if="currentUser" to="/user" class="nav-link">User</router-link>
+        </li> -->
+      </div>
+
+      <div v-if="!currentUser" class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <router-link to="/register" class="nav-link">+++++
+            <font-awesome-icon icon="user-plus" />Sign Up
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <router-link to="/login" class="nav-link">
+            <font-awesome-icon icon="sign-in-alt" />Login
+          </router-link>
+        </li>
+      </div>
+
+      <div v-if="currentUser" class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <router-link to="/profile" class="nav-link">
+            <font-awesome-icon icon="user" />
+            {{ currentUser.username }}
+          </router-link>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href @click.prevent="logOut">
+            <font-awesome-icon icon="sign-out-alt" />LogOut
+          </a>
+        </li>
+      </div>
+    </nav>
+    
+    <div class="col-md-12">
+    <div class="card card-container">
+      <img
+        id="profile-img"
+        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+        class="profile-img-card"
+      />
+      <form name="form" @submit.prevent="handleLogin">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            v-model="user.username"
+            v-validate="'required'"
+            type="text"
+            class="form-control"
+            name="username"
+          />
+          <div
+            v-if="errors.has('username')"
+            class="alert alert-danger"
+            role="alert"
+          >Username is required!</div>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            v-model="user.password"
+            v-validate="'required'"
+            type="password"
+            class="form-control"
+            name="password"
+          />
+          <div
+            v-if="errors.has('password')"
+            class="alert alert-danger"
+            role="alert"
+          >Password is required!</div>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary btn-block" :disabled="loading">
+            <span v-show="loading" class="spinner-border spinner-border-sm"></span>
+            <span>Login</span>
+          </button>
+        </div>
+        <div class="form-group">
+          <div v-if="message" class="alert alert-danger" role="alert">{{message}}</div>
+        </div>
+      </form>
+    </div>
+  </div>
+  </div>
+</template>
+
+<script>
+import User from '../models/user';
+
+export default {
+  name: 'Login',
+  data() {
+    return {
+      user: new User('', ''),
+      loading: false,
+      message: ''
+    };
+  },
+  computed: {
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    }
+  },
+  created() {
+    if (this.loggedIn) {
+      this.$router.push('/profile');
+    }
+  },
+  methods: {
+    handleLogin() {
+      this.loading = true;
+      this.$validator.validateAll().then(isValid => {
+        if (!isValid) {
+          this.loading = false;
+          return;
+        }
+
+        if (this.user.username && this.user.password) {
+          this.$store.dispatch('auth/login', this.user).then(
+            () => {
+             
+             
+              this.$router.push('/profile');
+            },
+            error => {
+              this.loading = false;
+              this.message =
+                (error.response && error.response.data) ||
+                error.message ||
+                error.toString();
+            }
+          );
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style scoped>
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+.card-container.card {
+  max-width: 350px !important;
+  padding: 40px 40px;
+}
+
+.card {
+  background-color: #f7f7f7;
+  padding: 20px 25px 30px;
+  margin: 0 auto 25px;
+  margin-top: 50px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+.profile-img-card {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 10px;
+  display: block;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+}
+ getdata(){
+        this.$http.get('http://localhost:3000/api/datas').then(
+          result => {
+            console.log(result.data)
+            this.data = result.data
+          },
+          error => {
+            console.error(error)
+          }
+        )
+  },
+  logOut() {
+      this.$store.dispatch('auth/logout');
+      this.$router.push('/login');
+    },
+    loggedin(){
+      if(this.currentUser.roles!="ROLE_DIRECTOR")
+       {
+         this.logOut()
+       }
+    },
+    <table class="table">
+  <thead>
+    <tr scope="row" rowspan="2">
+      <th scope="col">Sr.No</th>
+      <th scope="col">College</th>
+      <th scope="col2" colspan="2">Lagging</th>
+      <th scope="col2" colspan="2">OnTime</th>
+      <th scope="col2" colspan="2">Leading</th>
+      <th scope="col">Total</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th scope="col">Industrial</th>
+      <th scope="col">Research</th>
+      <th scope="col">Industrial</th>
+      <th scope="col">Research</th>
+      <th scope="col">Industrial</th>
+      <th scope="col">Research</th>
+      <th></th>
+      
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>VIT</td>
+      <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>5</td>
+      <td>27</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>VIIT</td>
+       <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>5</td>
+      <td>27</td>
+
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td>VU</td>
+      <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>5</td>
+      <td>4</td>
+      <td>5</td>
+      <td>27</td>
+    </tr>
+
+  </tbody>
+</table>
+</style>
+
+//////////////////// JINESH TEMP SIGNUP //////////////////////////// 
+
+<template>
+    <div id='app'>
+        <nav class="navbar navbar-expand navbar-dark bg-dark">
+
+            <a href class="navbar-brand" @click.prevent></a>
+            <div class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <router-link to="/home" class="nav-link">
+                        <font-awesome-icon icon="home" />Home
+                    </router-link>
+                </li>
+            </div>
+
+            <div v-if="!loggedIn" class="navbar-nav ml-auto">
+                <li class="nav-item">
+                <router-link to="/register" class="nav-link">
+                    <font-awesome-icon icon="user-plus" />Sign Up
+                </router-link>
+                </li>
+                <li class="nav-item">
+                <router-link to="/login" class="nav-link">
+                    <font-awesome-icon icon="sign-in-alt" />Login
+                </router-link>
+                </li>
+            </div>
+        </nav>
+        <div>
+                  <b-modal ref="my-modal" hide-footer title="Add Details">  
+                      <form name="form">
+                          <v-label>username</v-label>
+                      </form>
+                  </b-modal>
+                </div>
+
+
+        <div class="col-md-12">
+            <div class="card card-container">
+                <div id='leader1 '>
+                    <a href="http://localhost:8081/register"  target="_blank">GO</a>
+                    <v-btn v-on:click="showleadermodal()"> ADD LEADER </v-btn>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</template>
+
+<script>
+/* import User from '../models/user'; */
+export default {
+    name: 'temp_signup',
+    data(){
+        return{
+            message : "Sign up  ",
+        };
+    },
+    computed: {
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+        },
+    },
+    methods:{
+        showleadermodal() {
+            this.$refs["my-modal"].show();
+    },
+
+    },    
+}
+</script>
+
+<style scoped>
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+.card-container.card {
+  max-width: 500px !important;
+  padding: 40px 40px;
+}
+
+.card {
+  background-color: #f7f7f7;
+  padding: 20px 25px 30px;
+  margin: 0 auto 25px;
+  margin-top: 50px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+}
+</style>
