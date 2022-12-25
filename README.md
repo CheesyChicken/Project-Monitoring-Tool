@@ -8,8 +8,8 @@ Roles in Project Management System:
 
 
 # Student Login Demo
+<video src="https://user-images.githubusercontent.com/54988402/209465074-eb12884f-fd83-40b8-b2ab-e5bf3d63eae9.mp4"></video>
 
-https://user-images.githubusercontent.com/54988402/209465074-eb12884f-fd83-40b8-b2ab-e5bf3d63eae9.mp4
 
 # Faculty Login Demo
 
